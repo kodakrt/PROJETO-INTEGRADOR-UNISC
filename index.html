@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GásJá — Protótipo Angular</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde: #2d7a3a;
+    --verde-claro: #e8f5ea;
+    --verde-md: #4caf50;
+    --laranja: #f05a1a;
+    --laranja-claro: #fff0ea;
+    --laranja-md: #ff7d3b;
+    --cinza: #f4f4f4;
+    --cinza-md: #e0e0e0;
+    --cinza-texto: #666;
+    --texto: #1a1a1a;
+    --branco: #ffffff;
+    --sombra: 0 4px 20px rgba(0,0,0,0.10);
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: #f0f2f0;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 20px 0;
+  }
+
+  /* DEVICE FRAME */
+  .device {
+    width: 390px;
+    min-height: 780px;
+    background: var(--branco);
+    border-radius: 40px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25), 0 0 0 10px #1a1a1a;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .screen { display: none; flex-direction: column; flex: 1; overflow-y: auto; }
+  .screen.active { display: flex; }
+
+  /* NAV BAR */
+  .navbar {
+    background: var(--verde);
+    padding: 16px 20px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .navbar-admin { background: #1a1a1a; }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .logo-icon { font-size: 20px; }
+  .nav-btn {
+    background: rgba(255,255,255,0.18);
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 7px 16px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .nav-btn:hover { background: rgba(255,255,255,0.3); }
+  .nav-btn-laranja {
+    background: var(--laranja);
+    margin-left: 6px;
+  }
+  .back-btn {
+    background: none; border: none; color: #fff;
+    font-size: 20px; cursor: pointer; padding: 0 8px 0 0;
+  }
+  .nav-icon { font-size: 20px; cursor: pointer; }
+  .nav-icons { display: flex; gap: 12px; align-items: center; }
+
+  /* BOTTOM TAB */
+  .bottom-tab {
+    background: var(--branco);
+    border-top: 1px solid var(--cinza-md);
+    display: flex;
+    flex-shrink: 0;
+  }
+  .tab-item {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; padding: 10px 0;
+    cursor: pointer; font-size: 10px; color: var(--cinza-texto);
+    font-weight: 700; gap: 3px; border: none; background: none;
+    transition: color .2s;
+  }
+  .tab-item.active { color: var(--verde); }
+  .tab-item .tab-icon { font-size: 22px; }
+
+  /* CONTENT */
+  .content { padding: 20px; flex: 1; }
+
+  /* HOME */
+  .hero {
+    background: linear-gradient(135deg, var(--verde) 0%, #1a5c26 100%);
+    border-radius: var(--radius);
+    padding: 28px 24px;
+    color: #fff;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::after {
+    content: '🔥';
+    position: absolute; right: 20px; top: 50%;
+    transform: translateY(-50%); font-size: 64px; opacity: 0.15;
+  }
+  .hero h1 { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; line-height: 1.2; margin-bottom: 8px; }
+  .hero p { font-size: 14px; opacity: 0.85; margin-bottom: 20px; }
+  .hero-btns { display: flex; gap: 10px; }
+  .btn-primary {
+    background: var(--laranja);
+    color: #fff; border: none;
+    border-radius: 25px; padding: 12px 22px;
+    font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 800;
+    cursor: pointer; transition: transform .15s, box-shadow .15s;
+    box-shadow: 0 4px 14px rgba(240,90,26,0.4);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(240,90,26,0.5); }
+  .btn-outline-white {
+    background: rgba(255,255,255,0.15); color: #fff;
+    border: 1.5px solid rgba(255,255,255,0.4);
+    border-radius: 25px; padding: 12px 18px;
+    font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700;
+    cursor: pointer;
+  }
+
+  .features { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+  .feature-card {
+    background: var(--cinza); border-radius: var(--radius-sm);
+    padding: 16px 10px; text-align: center;
+  }
+  .feature-icon { font-size: 26px; margin-bottom: 6px; }
+  .feature-card p { font-size: 11px; font-weight: 700; color: var(--cinza-texto); }
+
+  .section-title { font-size: 16px; font-weight: 800; color: var(--texto); margin-bottom: 14px; }
+
+  .steps { display: flex; flex-direction: column; gap: 12px; }
+  .step {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--cinza); border-radius: var(--radius-sm); padding: 14px;
+  }
+  .step-num {
+    width: 36px; height: 36px; border-radius: 50%; background: var(--verde);
+    color: #fff; font-weight: 800; font-size: 16px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .step p { font-size: 13px; font-weight: 700; color: var(--texto); }
+  .step span { font-size: 12px; color: var(--cinza-texto); }
+
+  /* FORMS */
+  .form-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; margin-bottom: 4px; color: var(--texto); }
+  .form-sub { font-size: 13px; color: var(--cinza-texto); margin-bottom: 22px; }
+  .form-group { margin-bottom: 14px; }
+  .form-label { display: block; font-size: 12px; font-weight: 700; color: var(--cinza-texto); margin-bottom: 5px; text-transform: uppercase; letter-spacing: .5px; }
+  .form-input {
+    width: 100%; padding: 13px 16px;
+    border: 1.5px solid var(--cinza-md);
+    border-radius: var(--radius-sm); font-family: 'Nunito', sans-serif;
+    font-size: 14px; color: var(--texto); background: #fafafa;
+    transition: border-color .2s, box-shadow .2s;
+    outline: none;
+  }
+  .form-input:focus { border-color: var(--verde); box-shadow: 0 0 0 3px rgba(45,122,58,0.1); }
+  .btn-full {
+    width: 100%; padding: 15px;
+    background: var(--laranja); color: #fff; border: none;
+    border-radius: 25px; font-family: 'Nunito', sans-serif;
+    font-size: 15px; font-weight: 800; cursor: pointer;
+    margin-top: 6px; box-shadow: 0 4px 14px rgba(240,90,26,0.35);
+    transition: transform .15s;
+  }
+  .btn-full:hover { transform: translateY(-1px); }
+  .btn-full-verde { background: var(--verde); box-shadow: 0 4px 14px rgba(45,122,58,0.35); }
+  .form-link { text-align: center; font-size: 13px; color: var(--cinza-texto); margin-top: 16px; }
+  .form-link a { color: var(--verde); font-weight: 700; cursor: pointer; text-decoration: none; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* PEDIDO */
+  .order-section { margin-bottom: 20px; }
+  .section-label { font-size: 13px; font-weight: 800; color: var(--cinza-texto); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
+
+  .product-card {
+    border: 2px solid var(--cinza-md);
+    border-radius: var(--radius); padding: 14px 16px;
+    margin-bottom: 10px; cursor: pointer;
+    display: flex; align-items: center; gap: 14px;
+    transition: border-color .2s, background .2s;
+  }
+  .product-card.selected { border-color: var(--verde); background: var(--verde-claro); }
+  .product-radio {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 2px solid var(--cinza-md); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color .2s;
+  }
+  .product-card.selected .product-radio { border-color: var(--verde); }
+  .product-radio-inner {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--verde); display: none;
+  }
+  .product-card.selected .product-radio-inner { display: block; }
+  .product-icon { font-size: 28px; }
+  .product-info { flex: 1; }
+  .product-name { font-size: 14px; font-weight: 800; color: var(--texto); }
+  .product-desc { font-size: 12px; color: var(--cinza-texto); }
+  .product-price { font-size: 16px; font-weight: 800; color: var(--laranja); }
+
+  .qty-control {
+    display: flex; align-items: center; gap: 16px;
+    background: var(--cinza); border-radius: 25px; padding: 6px 16px;
+    width: fit-content;
+  }
+  .qty-btn {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--verde); color: #fff; border: none;
+    font-size: 20px; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    line-height: 1;
+  }
+  .qty-num { font-size: 18px; font-weight: 800; min-width: 24px; text-align: center; }
+
+  .pay-option {
+    border: 1.5px solid var(--cinza-md);
+    border-radius: var(--radius-sm); padding: 12px 14px;
+    margin-bottom: 8px; cursor: pointer;
+    display: flex; align-items: center; gap: 12px;
+    transition: border-color .2s;
+  }
+  .pay-option.selected { border-color: var(--verde); background: var(--verde-claro); }
+  .pay-icon { font-size: 20px; }
+  .pay-label { font-size: 14px; font-weight: 700; }
+
+  .order-summary {
+    background: var(--texto); color: #fff;
+    border-radius: var(--radius); padding: 18px;
+    margin-bottom: 16px;
+  }
+  .summary-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; }
+  .summary-row:last-child { font-size: 16px; font-weight: 800; margin-bottom: 0; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.15); }
+  .summary-row span:first-child { opacity: 0.7; }
+
+  /* STATUS */
+  .status-card {
+    background: var(--verde-claro); border: 2px solid var(--verde-md);
+    border-radius: var(--radius); padding: 18px; margin-bottom: 20px;
+  }
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--verde); color: #fff;
+    border-radius: 20px; padding: 5px 14px;
+    font-size: 13px; font-weight: 700; margin-bottom: 12px;
+  }
+  .status-number { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: var(--verde); }
+  .status-detail { font-size: 13px; color: var(--cinza-texto); margin-top: 4px; }
+
+  .tracker { margin: 20px 0; }
+  .tracker-steps {
+    display: flex; align-items: center; position: relative;
+    margin-bottom: 8px;
+  }
+  .tracker-line {
+    position: absolute; top: 15px; left: 15px; right: 15px; height: 3px;
+    background: var(--cinza-md); z-index: 0;
+  }
+  .tracker-progress {
+    position: absolute; top: 15px; left: 15px; height: 3px;
+    background: var(--verde); z-index: 1;
+    transition: width .5s;
+  }
+  .tracker-dot {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--cinza-md); z-index: 2;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; flex-shrink: 0;
+    transition: background .3s;
+  }
+  .tracker-dot.done { background: var(--verde); }
+  .tracker-dot.current { background: var(--laranja); animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(240,90,26,0.4); } 50% { box-shadow: 0 0 0 8px rgba(240,90,26,0); } }
+  .tracker-space { flex: 1; }
+  .tracker-labels { display: flex; justify-content: space-between; }
+  .tracker-label { font-size: 10px; font-weight: 700; color: var(--cinza-texto); width: 32px; text-align: center; }
+
+  .eta-card {
+    background: var(--laranja-claro); border: 2px solid var(--laranja-md);
+    border-radius: var(--radius); padding: 16px;
+    display: flex; align-items: center; gap: 14px; margin-bottom: 16px;
+  }
+  .eta-icon { font-size: 32px; }
+  .eta-label { font-size: 12px; color: var(--cinza-texto); font-weight: 700; }
+  .eta-time { font-size: 22px; font-weight: 900; color: var(--laranja); }
+
+  .info-card {
+    background: var(--cinza); border-radius: var(--radius);
+    padding: 16px; margin-bottom: 12px;
+  }
+  .info-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 13px; }
+  .info-row:not(:last-child) { border-bottom: 1px solid var(--cinza-md); }
+  .info-key { color: var(--cinza-texto); font-weight: 700; }
+  .info-val { font-weight: 800; color: var(--texto); }
+
+  .btn-danger {
+    width: 100%; padding: 13px;
+    background: #fff; color: #d32f2f; border: 2px solid #d32f2f;
+    border-radius: 25px; font-family: 'Nunito', sans-serif;
+    font-size: 14px; font-weight: 800; cursor: pointer; margin-bottom: 10px;
+  }
+  .btn-support {
+    width: 100%; padding: 13px;
+    background: var(--cinza); color: var(--texto); border: none;
+    border-radius: 25px; font-family: 'Nunito', sans-serif;
+    font-size: 14px; font-weight: 800; cursor: pointer;
+  }
+
+  /* HISTÓRICO */
+  .order-item {
+    background: var(--branco); border: 1.5px solid var(--cinza-md);
+    border-radius: var(--radius); padding: 16px; margin-bottom: 12px;
+    box-shadow: var(--sombra);
+  }
+  .order-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .order-item-num { font-size: 13px; font-weight: 800; color: var(--verde); }
+  .badge {
+    font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 12px;
+  }
+  .badge-green { background: var(--verde-claro); color: var(--verde); }
+  .badge-red { background: #ffebee; color: #c62828; }
+  .badge-orange { background: var(--laranja-claro); color: var(--laranja); }
+  .badge-blue { background: #e3f2fd; color: #1565c0; }
+  .order-item-desc { font-size: 13px; color: var(--cinza-texto); margin-bottom: 10px; }
+  .order-item-footer { display: flex; justify-content: space-between; align-items: center; }
+  .order-item-price { font-size: 16px; font-weight: 900; color: var(--texto); }
+  .order-item-btns { display: flex; gap: 8px; }
+  .btn-sm {
+    padding: 6px 12px; border-radius: 16px; font-size: 12px; font-weight: 700;
+    cursor: pointer; border: none; font-family: 'Nunito', sans-serif;
+  }
+  .btn-sm-green { background: var(--verde); color: #fff; }
+  .btn-sm-outline { background: var(--cinza); color: var(--texto); }
+
+  /* ADMIN */
+  .admin-tabs {
+    display: flex; background: #111; padding: 0 16px;
+    overflow-x: auto; flex-shrink: 0;
+  }
+  .admin-tab {
+    padding: 12px 16px; font-size: 13px; font-weight: 700;
+    color: rgba(255,255,255,0.5); cursor: pointer; white-space: nowrap;
+    border-bottom: 3px solid transparent; border: none; background: none;
+    font-family: 'Nunito', sans-serif; transition: color .2s;
+  }
+  .admin-tab.active { color: var(--laranja); border-bottom: 3px solid var(--laranja); }
+
+  .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .metric-card {
+    background: var(--branco); border-radius: var(--radius);
+    padding: 16px; box-shadow: var(--sombra);
+    border-left: 4px solid var(--verde);
+  }
+  .metric-card:nth-child(2) { border-left-color: var(--laranja); }
+  .metric-card:nth-child(3) { border-left-color: #1565c0; }
+  .metric-card:nth-child(4) { border-left-color: #6a1b9a; }
+  .metric-label { font-size: 11px; font-weight: 700; color: var(--cinza-texto); text-transform: uppercase; margin-bottom: 4px; }
+  .metric-value { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; color: var(--texto); }
+  .metric-sub { font-size: 11px; color: var(--cinza-texto); margin-top: 2px; }
+
+  .admin-order-item {
+    background: var(--branco); border-radius: var(--radius);
+    padding: 14px; margin-bottom: 10px; box-shadow: var(--sombra);
+    border-left: 4px solid var(--cinza-md);
+  }
+  .admin-order-item.novo { border-left-color: var(--laranja); }
+  .admin-order-item.preparo { border-left-color: #f9a825; }
+  .admin-order-item.entregue { border-left-color: var(--verde); }
+  .admin-order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .admin-order-num { font-size: 14px; font-weight: 800; color: var(--texto); }
+  .admin-order-client { font-size: 13px; color: var(--cinza-texto); margin-bottom: 6px; }
+  .admin-order-footer { display: flex; justify-content: space-between; align-items: center; }
+  .btn-ver {
+    background: var(--verde); color: #fff; border: none;
+    border-radius: 16px; padding: 7px 16px;
+    font-size: 12px; font-weight: 700; cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+  }
+  .select-status {
+    border: 1.5px solid var(--cinza-md); border-radius: 16px;
+    padding: 5px 10px; font-family: 'Nunito', sans-serif;
+    font-size: 12px; font-weight: 700; outline: none; cursor: pointer;
+    background: var(--cinza);
+  }
+
+  /* SUCCESS MODAL */
+  .success-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    display: none; align-items: center; justify-content: center;
+    z-index: 100; padding: 20px;
+  }
+  .success-overlay.show { display: flex; }
+  .success-modal {
+    background: var(--branco); border-radius: 24px; padding: 32px 24px;
+    text-align: center; width: 100%; max-width: 320px; animation: pop .3s ease;
+  }
+  @keyframes pop { from { transform: scale(.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .success-icon { font-size: 64px; margin-bottom: 12px; }
+  .success-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--verde); margin-bottom: 8px; }
+  .success-sub { font-size: 14px; color: var(--cinza-texto); margin-bottom: 24px; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--texto); color: #fff; padding: 10px 20px;
+    border-radius: 20px; font-size: 13px; font-weight: 700;
+    opacity: 0; transition: opacity .3s, transform .3s; z-index: 200;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .chip {
+    display: inline-block; background: var(--verde-claro); color: var(--verde);
+    border-radius: 12px; padding: 3px 10px; font-size: 11px; font-weight: 700;
+    margin-right: 5px;
+  }
+</style>
+</head>
+<body>
+
+<div class="device">
+
+  <!-- ==================== TELA HOME ==================== -->
+  <div class="screen active" id="screen-home">
+    <div class="navbar">
+      <div class="logo"><span class="logo-icon">🔥</span> GásJá</div>
+      <div>
+        <button class="nav-btn" onclick="go('login')">Entrar</button>
+        <button class="nav-btn nav-btn-laranja" onclick="go('cadastro')">Cadastrar</button>
+      </div>
+    </div>
+    <div class="content" style="padding-bottom:30px">
+      <div class="hero">
+        <h1>Gás em casa, rápido e seguro.</h1>
+        <p>Peça agora e receba em até 40 minutos na sua porta.</p>
+        <div class="hero-btns">
+          <button class="btn-primary" onclick="go('pedido')">🛒 Peça Agora</button>
+          <button class="btn-outline-white" onclick="showToast('P13: R$110 · P20: R$160 · P45: R$310')">Ver Preços</button>
+        </div>
+      </div>
+
+      <div class="features">
+        <div class="feature-card">
+          <div class="feature-icon">🏠</div>
+          <p>Entrega em casa</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <p>Rápido & fácil</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">✅</div>
+          <p>100% Seguro</p>
+        </div>
+      </div>
+
+      <p class="section-title">Como funciona?</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div><p>Cadastre-se ou faça login</p><span>Rápido, gratuito e seguro</span></div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div><p>Escolha o gás e quantidade</p><span>P13, P20 ou P45</span></div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div><p>Receba em casa</p><span>Entrega em até 40 minutos</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== CADASTRO ==================== -->
+  <div class="screen" id="screen-cadastro">
+    <div class="navbar">
+      <button class="back-btn" onclick="go('home')">←</button>
+      <div class="logo"><span class="logo-icon">🔥</span> GásJá</div>
+      <div style="width:40px"></div>
+    </div>
+    <div class="content" style="padding-bottom:30px">
+      <p class="form-title">Criar sua conta</p>
+      <p class="form-sub">Preencha seus dados para começar a pedir.</p>
+
+      <div class="form-group">
+        <label class="form-label">Nome completo</label>
+        <input class="form-input" type="text" placeholder="João da Silva">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">CPF</label>
+          <input class="form-input" type="text" placeholder="000.000.000-00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Telefone</label>
+          <input class="form-input" type="text" placeholder="(51) 99999-0000">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Endereço</label>
+        <input class="form-input" type="text" placeholder="Rua das Flores, 123">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Cidade</label>
+          <input class="form-input" type="text" placeholder="Porto Alegre">
+        </div>
+        <div class="form-group">
+          <label class="form-label">CEP</label>
+          <input class="form-input" type="text" placeholder="90000-000">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <input class="form-input" type="email" placeholder="joao@email.com">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Senha</label>
+          <input class="form-input" type="password" placeholder="••••••••">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirmar</label>
+          <input class="form-input" type="password" placeholder="••••••••">
+        </div>
+      </div>
+
+      <button class="btn-full" onclick="go('pedido')">Criar Conta</button>
+      <p class="form-link">Já tem conta? <a onclick="go('login')">Entrar</a></p>
+    </div>
+  </div>
+
+  <!-- ==================== LOGIN ==================== -->
+  <div class="screen" id="screen-login">
+    <div class="navbar">
+      <button class="back-btn" onclick="go('home')">←</button>
+      <div class="logo"><span class="logo-icon">🔥</span> GásJá</div>
+      <div style="width:40px"></div>
+    </div>
+    <div class="content" style="padding-top: 40px">
+      <div style="text-align:center; margin-bottom:30px">
+        <div style="font-size:56px; margin-bottom:12px">🔥</div>
+        <p class="form-title">Bem-vindo de volta!</p>
+        <p class="form-sub">Entre com seus dados para continuar.</p>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <input class="form-input" type="email" placeholder="joao@email.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Senha</label>
+        <input class="form-input" type="password" placeholder="••••••••">
+      </div>
+      <p style="text-align:right; font-size:13px; color:var(--verde); font-weight:700; cursor:pointer; margin-bottom:20px" onclick="showToast('Link de recuperação enviado!')">Esqueci minha senha</p>
+
+      <button class="btn-full btn-full-verde" onclick="go('pedido')">Entrar</button>
+      <p class="form-link">Não tem conta? <a onclick="go('cadastro')">Cadastrar-se</a></p>
+
+      <div style="margin-top:20px; text-align:center">
+        <p style="font-size:12px; color:var(--cinza-texto); margin-bottom:10px">Acesso administrativo?</p>
+        <button class="btn-sm btn-sm-outline" style="border:1.5px solid var(--cinza-md)" onclick="go('admin')">Painel da Distribuidora</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== PEDIDO ==================== -->
+  <div class="screen" id="screen-pedido">
+    <div class="navbar">
+      <button class="back-btn" onclick="go('home')">←</button>
+      <div class="logo" style="font-size:17px">Novo Pedido</div>
+      <div class="nav-icons">
+        <span class="nav-icon" onclick="showToast('Nenhuma notificação')">🔔</span>
+        <span class="nav-icon" onclick="go('historico')">👤</span>
+      </div>
+    </div>
+    <div class="content" style="padding-bottom:20px">
+
+      <div class="order-section">
+        <p class="section-label">Tipo de vasilhame</p>
+        <div class="product-card selected" id="prod-p13" onclick="selectProduct('p13')">
+          <div class="product-radio"><div class="product-radio-inner"></div></div>
+          <div class="product-icon">🔴</div>
+          <div class="product-info">
+            <div class="product-name">P13 — 13 kg</div>
+            <div class="product-desc">Botijão residencial</div>
+          </div>
+          <div class="product-price">R$ 110</div>
+        </div>
+        <div class="product-card" id="prod-p20" onclick="selectProduct('p20')">
+          <div class="product-radio"><div class="product-radio-inner"></div></div>
+          <div class="product-icon">🟠</div>
+          <div class="product-info">
+            <div class="product-name">P20 — 20 kg</div>
+            <div class="product-desc">Uso comercial leve</div>
+          </div>
+          <div class="product-price">R$ 160</div>
+        </div>
+        <div class="product-card" id="prod-p45" onclick="selectProduct('p45')">
+          <div class="product-radio"><div class="product-radio-inner"></div></div>
+          <div class="product-icon">⚫</div>
+          <div class="product-info">
+            <div class="product-name">P45 — 45 kg</div>
+            <div class="product-desc">Industrial / restaurante</div>
+          </div>
+          <div class="product-price">R$ 310</div>
+        </div>
+      </div>
+
+      <div class="order-section">
+        <p class="section-label">Quantidade</p>
+        <div class="qty-control">
+          <button class="qty-btn" onclick="changeQty(-1)">−</button>
+          <span class="qty-num" id="qty-display">1</span>
+          <button class="qty-btn" onclick="changeQty(1)">+</button>
+        </div>
+      </div>
+
+      <div class="order-section">
+        <p class="section-label">Endereço de entrega</p>
+        <div class="pay-option selected" id="addr-cad" onclick="selectAddr('cad')">
+          <div style="width:18px;height:18px;border-radius:50%;border:2px solid var(--verde);display:flex;align-items:center;justify-content:center;flex-shrink:0"><div style="width:9px;height:9px;border-radius:50%;background:var(--verde)"></div></div>
+          <span class="pay-icon">📍</span>
+          <span class="pay-label">Rua das Flores, 123 — Porto Alegre</span>
+        </div>
+        <div class="pay-option" id="addr-outro" onclick="selectAddr('outro')">
+          <div style="width:18px;height:18px;border-radius:50%;border:2px solid var(--cinza-md);flex-shrink:0"></div>
+          <span class="pay-icon">✏️</span>
+          <span class="pay-label">Outro endereço...</span>
+        </div>
+      </div>
+
+      <div class="order-section">
+        <p class="section-label">Forma de pagamento</p>
+        <div class="pay-option selected" id="pay-din" onclick="selectPay('din')">
+          <div style="width:18px;height:18px;border-radius:50%;border:2px solid var(--verde);display:flex;align-items:center;justify-content:center;flex-shrink:0"><div style="width:9px;height:9px;border-radius:50%;background:var(--verde)"></div></div>
+          <span class="pay-icon">💵</span><span class="pay-label">Dinheiro na entrega</span>
+        </div>
+        <div class="pay-option" id="pay-pix" onclick="selectPay('pix')">
+          <div style="width:18px;height:18px;border-radius:50%;border:2px solid var(--cinza-md);flex-shrink:0"></div>
+          <span class="pay-icon">📱</span><span class="pay-label">PIX (antecipado)</span>
+        </div>
+        <div class="pay-option" id="pay-card" onclick="selectPay('card')">
+          <div style="width:18px;height:18px;border-radius:50%;border:2px solid var(--cinza-md);flex-shrink:0"></div>
+          <span class="pay-icon">💳</span><span class="pay-label">Cartão na entrega</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Observações</label>
+        <input class="form-input" type="text" placeholder="Ex: Ligar antes de chegar...">
+      </div>
+
+      <div class="order-summary">
+        <div class="summary-row"><span>Produto</span><span id="sum-product">P13 × 1</span></div>
+        <div class="summary-row"><span>Frete</span><span style="color:#4caf50">Grátis</span></div>
+        <div class="summary-row"><span>TOTAL</span><span id="sum-total">R$ 110,00</span></div>
+      </div>
+
+      <button class="btn-full" onclick="confirmarPedido()">Confirmar Pedido ✓</button>
+    </div>
+  </div>
+
+  <!-- ==================== STATUS ==================== -->
+  <div class="screen" id="screen-status">
+    <div class="navbar">
+      <button class="back-btn" onclick="go('historico')">←</button>
+      <div class="logo" style="font-size:17px">Status do Pedido</div>
+      <div style="width:40px"></div>
+    </div>
+    <div class="content">
+      <div class="status-card">
+        <div class="status-badge">🔄 Em andamento</div>
+        <div class="status-number">Pedido #2047</div>
+        <div class="status-detail">1× P13 — 13 kg &nbsp;·&nbsp; Dinheiro na entrega</div>
+        <div class="status-detail">Realizado: 27/03/2025 às 14:32</div>
+      </div>
+
+      <div class="tracker">
+        <p class="section-label">Acompanhe seu pedido</p>
+        <div class="tracker-steps">
+          <div class="tracker-line"></div>
+          <div class="tracker-progress" style="width:55%"></div>
+          <div class="tracker-dot done">✓</div>
+          <div class="tracker-space"></div>
+          <div class="tracker-dot done">✓</div>
+          <div class="tracker-space"></div>
+          <div class="tracker-dot current">🛵</div>
+          <div class="tracker-space"></div>
+          <div class="tracker-dot" style="font-size:16px">🏠</div>
+        </div>
+        <div class="tracker-labels">
+          <div class="tracker-label">Recebido</div>
+          <div class="tracker-label">Preparo</div>
+          <div class="tracker-label">Em rota</div>
+          <div class="tracker-label">Entregue</div>
+        </div>
+      </div>
+
+      <div class="eta-card">
+        <div class="eta-icon">🛵</div>
+        <div>
+          <div class="eta-label">Previsão de chegada</div>
+          <div class="eta-time">~40 minutos</div>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-row">
+          <span class="info-key">Entregador</span>
+          <span class="info-val">Carlos Silva 📞</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Endereço</span>
+          <span class="info-val">Rua das Flores, 123</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Pagamento</span>
+          <span class="info-val">Dinheiro na entrega</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Total</span>
+          <span class="info-val" style="color:var(--laranja)">R$ 110,00</span>
+        </div>
+      </div>
+
+      <button class="btn-danger" onclick="showToast('Solicitação de cancelamento enviada.')">Cancelar Pedido</button>
+      <button class="btn-support" onclick="showToast('Abrindo WhatsApp...')">💬 Suporte</button>
+    </div>
+
+    <div class="bottom-tab">
+      <button class="tab-item" onclick="go('pedido')"><span class="tab-icon">🛒</span>Pedir</button>
+      <button class="tab-item active"><span class="tab-icon">📍</span>Status</button>
+      <button class="tab-item" onclick="go('historico')"><span class="tab-icon">📋</span>Histórico</button>
+      <button class="tab-item" onclick="go('home')"><span class="tab-icon">👤</span>Perfil</button>
+    </div>
+  </div>
+
+  <!-- ==================== HISTÓRICO ==================== -->
+  <div class="screen" id="screen-historico">
+    <div class="navbar">
+      <div class="logo"><span class="logo-icon">🔥</span> GásJá</div>
+      <div class="nav-icons">
+        <span class="nav-icon">🔔</span>
+        <span class="nav-icon">👤</span>
+      </div>
+    </div>
+    <div class="content">
+      <p class="section-title">Meus Pedidos</p>
+      <p style="font-size:13px;color:var(--cinza-texto);margin-bottom:16px">Olá, João! 👋 Aqui estão seus pedidos.</p>
+
+      <div class="order-item">
+        <div class="order-item-header">
+          <span class="order-item-num">Pedido #2047</span>
+          <span class="badge badge-orange">🔄 Em rota</span>
+        </div>
+        <div class="order-item-desc">1× P13 — 13 kg &nbsp;·&nbsp; 27/03/2025</div>
+        <div class="order-item-footer">
+          <span class="order-item-price">R$ 110,00</span>
+          <div class="order-item-btns">
+            <button class="btn-sm btn-sm-green" onclick="go('status')">Ver status</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="order-item">
+        <div class="order-item-header">
+          <span class="order-item-num">Pedido #2031</span>
+          <span class="badge badge-green">✅ Entregue</span>
+        </div>
+        <div class="order-item-desc">2× P13 — 13 kg &nbsp;·&nbsp; 15/03/2025</div>
+        <div class="order-item-footer">
+          <span class="order-item-price">R$ 220,00</span>
+          <div class="order-item-btns">
+            <button class="btn-sm btn-sm-outline" onclick="go('status')">Detalhes</button>
+            <button class="btn-sm btn-sm-green" onclick="repetirPedido()">Repetir</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="order-item">
+        <div class="order-item-header">
+          <span class="order-item-num">Pedido #2018</span>
+          <span class="badge badge-green">✅ Entregue</span>
+        </div>
+        <div class="order-item-desc">1× P20 — 20 kg &nbsp;·&nbsp; 05/03/2025</div>
+        <div class="order-item-footer">
+          <span class="order-item-price">R$ 160,00</span>
+          <div class="order-item-btns">
+            <button class="btn-sm btn-sm-outline" onclick="go('status')">Detalhes</button>
+            <button class="btn-sm btn-sm-green" onclick="repetirPedido()">Repetir</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="order-item">
+        <div class="order-item-header">
+          <span class="order-item-num">Pedido #2010</span>
+          <span class="badge badge-red">❌ Cancelado</span>
+        </div>
+        <div class="order-item-desc">1× P45 — 45 kg &nbsp;·&nbsp; 02/03/2025</div>
+        <div class="order-item-footer">
+          <span class="order-item-price">R$ 310,00</span>
+          <div class="order-item-btns">
+            <button class="btn-sm btn-sm-outline" onclick="go('status')">Detalhes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-tab">
+      <button class="tab-item" onclick="go('pedido')"><span class="tab-icon">🛒</span>Pedir</button>
+      <button class="tab-item" onclick="go('status')"><span class="tab-icon">📍</span>Status</button>
+      <button class="tab-item active"><span class="tab-icon">📋</span>Histórico</button>
+      <button class="tab-item" onclick="showToast('Perfil em desenvolvimento')"><span class="tab-icon">👤</span>Perfil</button>
+    </div>
+  </div>
+
+  <!-- ==================== ADMIN ==================== -->
+  <div class="screen" id="screen-admin">
+    <div class="navbar navbar-admin">
+      <div class="logo">🔥 Admin</div>
+      <div>
+        <button class="nav-btn" onclick="showToast('Notificações')">🔔</button>
+        <button class="nav-btn nav-btn-laranja" onclick="go('home')">Sair</button>
+      </div>
+    </div>
+    <div class="admin-tabs">
+      <button class="admin-tab active">Dashboard</button>
+      <button class="admin-tab" onclick="showToast('Seção Pedidos')">Pedidos</button>
+      <button class="admin-tab" onclick="showToast('Seção Clientes')">Clientes</button>
+      <button class="admin-tab" onclick="showToast('Seção Relatórios')">Relatórios</button>
+    </div>
+    <div class="content" style="padding-bottom:24px">
+      <p style="font-size:13px;color:var(--cinza-texto);margin-bottom:14px;font-weight:700">📅 Resumo de hoje — 27/03/2025</p>
+
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-label">Novos pedidos</div>
+          <div class="metric-value">12</div>
+          <div class="metric-sub">↑ 4 em relação a ontem</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Em rota</div>
+          <div class="metric-value">3</div>
+          <div class="metric-sub">Entregadores ativos</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Entregues</div>
+          <div class="metric-value">8</div>
+          <div class="metric-sub">98% taxa de sucesso</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Receita</div>
+          <div class="metric-value" style="font-size:20px">R$1.540</div>
+          <div class="metric-sub">Meta: R$2.000</div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <p class="section-title" style="margin:0">Pedidos Recebidos</p>
+        <select class="select-status" onchange="showToast('Filtro aplicado')">
+          <option>Todos</option>
+          <option>Novos</option>
+          <option>Em preparo</option>
+          <option>Em rota</option>
+          <option>Entregues</option>
+        </select>
+      </div>
+
+      <div class="admin-order-item novo">
+        <div class="admin-order-header">
+          <span class="admin-order-num">#2050</span>
+          <span class="badge badge-orange">🔴 Novo</span>
+        </div>
+        <div class="admin-order-client">👤 João da Silva &nbsp;·&nbsp; 1× P13 — 13 kg</div>
+        <div class="admin-order-footer">
+          <span style="font-size:13px;color:var(--cinza-texto)">📍 Rua das Flores, 123 &nbsp;·&nbsp; <b>R$110</b></span>
+          <div style="display:flex;gap:6px">
+            <select class="select-status" onchange="showToast('Status atualizado!')">
+              <option>Novo</option>
+              <option>Preparando</option>
+              <option>Em rota</option>
+              <option>Entregue</option>
+            </select>
+            <button class="btn-ver" onclick="showToast('Detalhes do pedido #2050')">Ver</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-order-item preparo">
+        <div class="admin-order-header">
+          <span class="admin-order-num">#2049</span>
+          <span class="badge badge-blue">🟡 Preparando</span>
+        </div>
+        <div class="admin-order-client">👤 Maria Lima &nbsp;·&nbsp; 2× P13 — 13 kg</div>
+        <div class="admin-order-footer">
+          <span style="font-size:13px;color:var(--cinza-texto)">📍 Av. Brasil, 456 &nbsp;·&nbsp; <b>R$220</b></span>
+          <div style="display:flex;gap:6px">
+            <select class="select-status" onchange="showToast('Status atualizado!')">
+              <option>Novo</option>
+              <option selected>Preparando</option>
+              <option>Em rota</option>
+              <option>Entregue</option>
+            </select>
+            <button class="btn-ver" onclick="showToast('Detalhes do pedido #2049')">Ver</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-order-item">
+        <div class="admin-order-header">
+          <span class="admin-order-num">#2048</span>
+          <span class="badge badge-orange">🛵 Em rota</span>
+        </div>
+        <div class="admin-order-client">👤 Pedro Mello &nbsp;·&nbsp; 1× P45 — 45 kg</div>
+        <div class="admin-order-footer">
+          <span style="font-size:13px;color:var(--cinza-texto)">📍 Rua XV, 789 &nbsp;·&nbsp; <b>R$310</b></span>
+          <div style="display:flex;gap:6px">
+            <select class="select-status" onchange="showToast('Status atualizado!')">
+              <option>Novo</option>
+              <option>Preparando</option>
+              <option selected>Em rota</option>
+              <option>Entregue</option>
+            </select>
+            <button class="btn-ver" onclick="showToast('Detalhes do pedido #2048')">Ver</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-order-item entregue">
+        <div class="admin-order-header">
+          <span class="admin-order-num">#2047</span>
+          <span class="badge badge-green">✅ Entregue</span>
+        </div>
+        <div class="admin-order-client">👤 Ana Costa &nbsp;·&nbsp; 1× P20 — 20 kg</div>
+        <div class="admin-order-footer">
+          <span style="font-size:13px;color:var(--cinza-texto)">📍 Rua Ipiranga, 321 &nbsp;·&nbsp; <b>R$160</b></span>
+          <div style="display:flex;gap:6px">
+            <select class="select-status" onchange="showToast('Status atualizado!')">
+              <option>Novo</option>
+              <option>Preparando</option>
+              <option>Em rota</option>
+              <option selected>Entregue</option>
+            </select>
+            <button class="btn-ver" onclick="showToast('Detalhes do pedido #2047')">Ver</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUCCESS MODAL -->
+  <div class="success-overlay" id="success-overlay">
+    <div class="success-modal">
+      <div class="success-icon">✅</div>
+      <div class="success-title">Pedido Confirmado!</div>
+      <div class="success-sub">Seu gás está sendo preparado e será entregue em até 40 minutos.</div>
+      <button class="btn-full btn-full-verde" onclick="closeSuccess()">Acompanhar Pedido</button>
+    </div>
+  </div>
+
+</div><!-- /device -->
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- NAV EXTERNAL BUTTONS -->
+<div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap; justify-content:center; max-width:420px">
+  <button onclick="go('home')" style="background:#2d7a3a;color:#fff;border:none;border-radius:20px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:Nunito,sans-serif">🏠 Home</button>
+  <button onclick="go('cadastro')" style="background:#2d7a3a;color:#fff;border:none;border-radius:20px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:Nunito,sans-serif">📝 Cadastro</button>
+  <button onclick="go('login')" style="background:#2d7a3a;color:#fff;border:none;border-radius:20px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:Nunito,sans-serif">🔑 Login</button>
+  <button onclick="go('pedido')" style="background:#f05a1a;color:#fff;border:none;border-radius:20px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:Nunito,sans-serif">🛒 Pedido</button>
+  <button onclick="go('status')" style="background:#f05a1a;color:#fff;border:none;border-radius:20px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:Nunito,sans-serif">📍 Status</button>
+  <button onclick="go('historico')" style="background:#f05a1a;color:#fff;border:none;border-radius:20px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:Nunito,sans-serif">📋 Histórico</button>
+  <button onclick="go('admin')" style="background:#1a1a1a;color:#fff;border:none;border-radius:20px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:Nunito,sans-serif">⚙️ Admin</button>
+</div>
+
+<script>
+// Angular-style: State management
+const state = {
+  selectedProduct: 'p13',
+  qty: 1,
+  prices: { p13: 110, p20: 160, p45: 310 },
+  labels: { p13: 'P13', p20: 'P20', p45: 'P45' },
+  selectedPay: 'din',
+  selectedAddr: 'cad'
+};
+
+// Angular Router simulation
+function go(screen) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + screen).classList.add('active');
+  document.getElementById('screen-' + screen).scrollTop = 0;
+}
+
+// Product selection
+function selectProduct(prod) {
+  state.selectedProduct = prod;
+  ['p13','p20','p45'].forEach(p => {
+    document.getElementById('prod-' + p).classList.remove('selected');
+  });
+  document.getElementById('prod-' + prod).classList.add('selected');
+  updateSummary();
+}
+
+// Quantity
+function changeQty(delta) {
+  state.qty = Math.max(1, Math.min(10, state.qty + delta));
+  document.getElementById('qty-display').textContent = state.qty;
+  updateSummary();
+}
+
+// Payment
+function selectPay(pay) {
+  state.selectedPay = pay;
+  ['din','pix','card'].forEach(p => {
+    const el = document.getElementById('pay-' + p);
+    el.classList.remove('selected');
+    el.querySelector('div').style.borderColor = 'var(--cinza-md)';
+    const inner = el.querySelector('div > div');
+    if (inner) inner.style.display = 'none';
+  });
+  const selected = document.getElementById('pay-' + pay);
+  selected.classList.add('selected');
+  selected.querySelector('div').style.borderColor = 'var(--verde)';
+}
+
+// Address
+function selectAddr(addr) {
+  state.selectedAddr = addr;
+  ['cad','outro'].forEach(a => {
+    document.getElementById('addr-' + a).classList.remove('selected');
+  });
+  document.getElementById('addr-' + addr).classList.add('selected');
+}
+
+// Update summary
+function updateSummary() {
+  const price = state.prices[state.selectedProduct];
+  const total = price * state.qty;
+  const label = state.labels[state.selectedProduct];
+  document.getElementById('sum-product').textContent = label + ' × ' + state.qty;
+  document.getElementById('sum-total').textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
+}
+
+// Confirm order
+function confirmarPedido() {
+  document.getElementById('success-overlay').classList.add('show');
+}
+
+function closeSuccess() {
+  document.getElementById('success-overlay').classList.remove('show');
+  go('status');
+}
+
+// Repetir pedido
+function repetirPedido() {
+  showToast('Pedido anterior carregado!');
+  setTimeout(() => go('pedido'), 800);
+}
+
+// Toast notification
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
